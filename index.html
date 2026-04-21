@@ -230,7 +230,7 @@ function imcCat(v){return v<18.5?{l:"Bajo peso",c:"var(--blue)"}:v<25?{l:"Normop
 function estFat(imc,age,male){const a=age||PR.age||29;return male?+(0.1*imc*imc+0.23*a-16.2).toFixed(1):+((1.20*imc)+(0.23*a)-5.4).toFixed(1);}
 function idealRange(h){const hcm=h||PR.height||152;const i=hcm-100-((hcm-150)/2);return{min:+(i-4).toFixed(1),max:+(i+4).toFixed(1)};}
 function whr(w,hip){return w&&hip?{ratio:+(w/hip).toFixed(2),risk:w/hip>=(isMale()?0.9:0.85)?"⚠️ Riesgo":"✅ Normal"}:null;}
-function totals(){return DD.meals.reduce((a,m)=>({cal:a.cal+m.cal,prot:a.prot+m.prot,carbs:a.carbs+m.carbs,fat:a.fat+m.fat}),{cal:0,prot:0,carbs:0,fat:0});}
+function totals(){const r=DD.meals.reduce((a,m)=>({cal:a.cal+m.cal,prot:a.prot+m.prot,carbs:a.carbs+m.carbs,fat:a.fat+m.fat}),{cal:0,prot:0,carbs:0,fat:0});return{cal:Math.round(r.cal),prot:+r.prot.toFixed(1),carbs:+r.carbs.toFixed(1),fat:+r.fat.toFixed(1)};}
 function exCal(){return DD.exercises.reduce((a,e)=>a+e.cal_burned,0);}
 function allFoods(){return[...FOOD_DB,...CF];}
 function isToday(){return AD===td();}
@@ -315,7 +315,7 @@ function renderHome(){
 
   // Macros
   const mc=card([]);mc.innerHTML=`<div style="font-size:14px;font-weight:700;margin-bottom:8px">Macronutrientes</div>`;
-  [{l:"Proteína 💪",v:t.prot,g:pg,c:"var(--pur)"},{l:"Carbos 🌾",v:t.carbs,g:carg,c:"var(--yel)"},{l:"Grasas 🥑",v:t.fat,g:fg,c:"var(--pink)"}].forEach(m=>{
+  [{l:"Proteína 💪",v:t.prot.toFixed(1),g:pg,c:"var(--pur)"},{l:"Carbos 🌾",v:t.carbs.toFixed(1),g:carg,c:"var(--yel)"},{l:"Grasas 🥑",v:t.fat.toFixed(1),g:fg,c:"var(--pink)"}].forEach(m=>{
     const row=h("div",{style:{marginBottom:"8px"}});
     row.innerHTML=`<div class="bb" style="margin-bottom:2px"><span style="font-size:11px;color:var(--tx3)">${m.l}</span><span style="font-size:12px;font-weight:700;color:${m.c}">${m.v}<span style="color:var(--tx3);font-weight:400">/${m.g}g</span></span></div>`;
     row.appendChild(barEl(pct(m.v,m.g),m.c));mc.appendChild(row);
@@ -437,7 +437,7 @@ function renderFood(){
   const t=totals();
   if(DD.meals&&DD.meals.length>0){
     const sc=card([]);sc.style.cssText="background:#0d1520;border-color:#1e3a5f;";
-    sc.innerHTML=`<div style="display:flex;justify-content:space-around">${[{l:"kcal",v:t.cal,c:"var(--blue)"},{l:"prot",v:t.prot+"g",c:"var(--pur)"},{l:"carbos",v:t.carbs+"g",c:"var(--yel)"},{l:"grasas",v:t.fat+"g",c:"var(--pink)"}].map(x=>`<div style="text-align:center"><div style="font-size:16px;font-weight:800;color:${x.c}">${x.v}</div><div style="font-size:10px;color:var(--tx3)">${x.l}</div></div>`).join("")}</div>`;
+    sc.innerHTML=`<div style="display:flex;justify-content:space-around">${[{l:"kcal",v:t.cal,c:"var(--blue)"},{l:"prot",v:t.prot.toFixed(1)+"g",c:"var(--pur)"},{l:"carbos",v:t.carbs.toFixed(1)+"g",c:"var(--yel)"},{l:"grasas",v:t.fat.toFixed(1)+"g",c:"var(--pink)"}].map(x=>`<div style="text-align:center"><div style="font-size:16px;font-weight:800;color:${x.c}">${x.v}</div><div style="font-size:10px;color:var(--tx3)">${x.l}</div></div>`).join("")}</div>`;
     el.appendChild(sc);
   }
 
@@ -449,7 +449,7 @@ function renderFood(){
     sc.innerHTML=`<div class="bb" style="margin-bottom:8px"><span style="font-size:14px;font-weight:700">${labels[slot]}</span><span style="font-size:11px;color:var(--blue)">${sm.reduce((a,m)=>a+m.cal,0)} kcal</span></div>`;
     sm.forEach(m=>{
       const row=h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"7px 0",borderBottom:"1px solid var(--bg3)"}});
-      row.innerHTML=`<div style="flex:1"><div style="font-size:13px;font-weight:600">${m.name}</div><div style="font-size:10px;color:var(--tx3)">${m.qty} ${m.unit} · P:${m.prot}g C:${m.carbs}g G:${m.fat}g</div></div>
+      row.innerHTML=`<div style="flex:1"><div style="font-size:13px;font-weight:600">${m.name}</div><div style="font-size:10px;color:var(--tx3)">${m.qty} ${m.unit} · P:${(+m.prot).toFixed(1)}g C:${(+m.carbs).toFixed(1)}g G:${(+m.fat).toFixed(1)}g</div></div>
       <div style="display:flex;align-items:center;gap:8px"><span style="font-size:14px;font-weight:700;color:var(--blue)">${m.cal}</span><button class="rmv">✕</button></div>`;
       row.querySelector(".rmv").onclick=()=>{DD.meals=DD.meals.filter(x=>x.id!==m.id);saveDay();renderFood();renderHome();};
       sc.appendChild(row);
